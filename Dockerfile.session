@@ -1,0 +1,33 @@
+FROM ubuntu:latest
+
+ENV UNAME=ubuntu
+
+RUN sed -i 's|http://archive.ubuntu.com/ubuntu/|http://br.archive.ubuntu.com/ubuntu/|g' /etc/apt/sources.list /etc/apt/sources.list.d/ubuntu.sources
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg \
+    software-properties-common \
+    apt-transport-https \
+    qtbase5-dev \
+    qtbase5-dev-tools \
+    qtdeclarative5-dev \
+    qttools5-dev \
+    qttools5-dev-tools \
+    libgbm1 \
+    libdrm2 \
+    libasound2-plugins \
+    libasound2-data
+    --no-install-recommends
+
+COPY entrypoint.session.sh /entrypoint.session.sh
+
+RUN curl -s https://deb.oxen.io/pub.gpg | apt-key add -
+
+RUN echo "deb [arch=amd64] https://deb.oxen.io $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/session-messenger.list
+
+RUN apt-get update && apt-get install -y session-desktop
+
+USER $UNAME
+
+CMD ["/entrypoint.session.sh"]
